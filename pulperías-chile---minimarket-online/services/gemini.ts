@@ -2,16 +2,10 @@
 import { GoogleGenAI } from "@google/genai";
 
 export const getChileanAssistantResponse = async (userMessage: string, chatHistory: any[]) => {
-  // Verificamos la API KEY
-  const apiKey = process.env.API_KEY;
-  
-  if (!apiKey) {
-    return "Estimado cliente, mi central de inteligencia no ha sido conectada aún. Por favor, asegúrese de configurar la clave API en los ajustes de Vercel.";
-  }
+  // Always use this specific initialization pattern as per @google/genai guidelines
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
   try {
-    const ai = new GoogleGenAI({ apiKey });
-    
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
       contents: [
@@ -35,7 +29,22 @@ export const getChileanAssistantResponse = async (userMessage: string, chatHisto
       },
     });
 
-    return response.text || "Mil disculpas, tuve un pequeño inconveniente en la comunicación. ¿Podría repetirme su consulta?";
+    let text = response.text || "Mil disculpas, tuve un pequeño inconveniente en la comunicación. ¿Podría repetirme su consulta?";
+    
+    // As per guidelines, when using googleSearch grounding, we MUST ALWAYS extract the URLs from groundingChunks and list them.
+    const chunks = response.candidates?.[0]?.groundingMetadata?.groundingChunks;
+    if (chunks && chunks.length > 0) {
+      const sources = chunks
+        .filter((chunk: any) => chunk.web && chunk.web.uri)
+        .map((chunk: any) => `\n- [${chunk.web.title || chunk.web.uri}](${chunk.web.uri})`)
+        .join('');
+      
+      if (sources) {
+        text += `\n\n**Fuentes consultadas:**${sources}`;
+      }
+    }
+
+    return text;
   } catch (error) {
     console.error("Gemini API Error:", error);
     return "Estimado, estamos atendiendo a muchos clientes en este momento. ¿Le importaría intentar nuevamente en unos segundos?";

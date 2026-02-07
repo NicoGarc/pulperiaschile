@@ -278,7 +278,8 @@ const App: React.FC = () => {
         </div>
       )}
 
-      {currentRoute !== AppRoute.CHECKOUT && currentRoute !== AppRoute.INTRANET && <ChatAssistant />}
+      {/* Fixed redundant check: currentRoute is already confirmed not to be INTRANET by early return on line 66 */}
+      {currentRoute !== AppRoute.CHECKOUT && <ChatAssistant />}
     </div>
   );
 };
