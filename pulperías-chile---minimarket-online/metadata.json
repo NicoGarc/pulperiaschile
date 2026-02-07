@@ -1,0 +1,8 @@
+{
+  "name": "Pulperías Chile - Minimarket Online",
+  "description": "Una tienda online moderna que combina lo mejor de un minimarket contemporáneo con productos tradicionales chilenos, incluyendo un asistente de IA experto en cultura culinaria nacional.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
